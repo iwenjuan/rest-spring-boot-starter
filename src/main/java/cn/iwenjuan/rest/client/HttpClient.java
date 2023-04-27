@@ -1,12 +1,11 @@
 package cn.iwenjuan.rest.client;
 
 import cn.iwenjuan.rest.FileUpload;
-import cn.iwenjuan.rest.config.RestTemplateBuilder;
-import cn.iwenjuan.rest.context.SpringApplicationContext;
-import cn.iwenjuan.rest.enums.ClientType;
-import cn.iwenjuan.rest.properties.UrlConnectionProperties;
+import cn.iwenjuan.rest.RestRequestEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -20,304 +19,122 @@ import java.util.Objects;
  * @author li1244
  * @date 2023/3/23 17:12
  */
+@Slf4j
 public class HttpClient {
 
-    private static RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
-    static {
-        restTemplate = SpringApplicationContext.getBean("restTemplate");
-        if (restTemplate == null) {
-            restTemplate = RestTemplateBuilder.create()
-                    .clientType(ClientType.URLConnection)
-                    .urlConnection(new UrlConnectionProperties())
-                    .build();
-        }
+    private RestRequestEntity requestEntity;
+
+    public HttpClient(RestTemplate restTemplate, RestRequestEntity requestEntity) {
+        Assert.notNull(restTemplate, "restTemplate can not be null");
+        Assert.notNull(requestEntity, "requestEntity can not be null");
+        this.restTemplate = restTemplate;
+        this.requestEntity = requestEntity;
     }
 
     /**
      * 发送get请求
-     * @param url   请求地址
      * @return
      */
-    public static String doGet(String url) {
-        return doGet(url, String.class);
+    public String doGet() {
+        return doGet(String.class);
     }
 
     /**
      * 发送get请求
-     * @param url           请求地址
-     * @param responseType  返回结果类型
      * @return
      */
-    public static <T> T doGet(String url, Class<T> responseType) {
-        return doGet(url, null, responseType);
-    }
-
-    /**
-     * 发送get请求
-     * @param url       请求地址
-     * @param params    请求参数
-     * @return
-     */
-    public static String doGet(String url, Map<String, String[]> params) {
-        return doGet(url, params, String.class);
-    }
-
-    /**
-     * 发送get请求
-     * @param url           请求地址
-     * @param params        请求参数
-     * @param responseType  返回结果类型
-     * @return
-     */
-    public static <T> T doGet(String url, Map<String, String[]> params, Class<T> responseType) {
-        return doGetWithHeaders(url, params, null, responseType);
-    }
-
-    /**
-     * 发送get请求
-     * @param url       请求地址
-     * @param headers   请求头
-     * @return
-     */
-    public static String doGetWithHeaders(String url, Map<String, String> headers) {
-        return doGetWithHeaders(url, headers, String.class);
-    }
-
-    /**
-     * 发送get请求
-     * @param url           请求地址
-     * @param headers       请求头
-     * @param responseType  返回结果类型
-     * @return
-     */
-    public static <T> T doGetWithHeaders(String url, Map<String, String> headers, Class<T> responseType) {
-        return doGetWithHeaders(url, null, headers, responseType);
-    }
-
-    /**
-     * 发送get请求
-     * @param url       请求地址
-     * @param params    请求参数
-     * @param headers   请求头
-     * @return
-     */
-    public static String doGetWithHeaders(String url, Map<String, String[]> params, Map<String, String> headers) {
-        return doGetWithHeaders(url, params, headers, String.class);
-    }
-
-    /**
-     * 发送get请求
-     * @param url           请求地址
-     * @param params        请求参数
-     * @param headers       请求头
-     * @param responseType  返回结果类型
-     * @return
-     */
-    public static <T> T doGetWithHeaders(String url, Map<String, String[]> params, Map<String, String> headers, Class<T> responseType) {
-
-        HttpHeaders httpHeaders = getHttpHeaders(headers);
+    public <T> T doGet(Class<T> responseType) {
+        HttpHeaders httpHeaders = getHttpHeaders();
         HttpEntity httpEntity = new HttpEntity(null, httpHeaders);
-        ResponseEntity<T> responseEntity = restTemplate.exchange(getUrlWithParams(url, params), HttpMethod.GET, httpEntity, responseType);
-        return responseEntity.getBody();
+        return exchange(httpEntity, HttpMethod.GET, responseType);
     }
 
     /**
      * 发送post请求
-     * @param url   请求地址
      * @return
      */
-    public static String doPost(String url) {
-        return doPost(url, String.class);
+    public String doPost() {
+        return doPost(String.class);
     }
 
     /**
      * 发送post请求
-     * @param url           请求地址
-     * @param responseType  返回结果类型
      * @return
      */
-    public static <T> T doPost(String url, Class<T> responseType) {
-        return doPost(url, null, null, responseType);
-    }
-
-    /**
-     * 发送post请求
-     * @param url       请求地址
-     * @param body      请求参数（body参数）
-     * @return
-     */
-    public static String doPost(String url, Object body) {
-        return doPost(url, body, String.class);
-    }
-
-    /**
-     * 发送post请求
-     * @param url           请求地址
-     * @param body          请求参数（body参数）
-     * @param responseType  返回结果类型
-     * @return
-     */
-    public static <T> T doPost(String url, Object body, Class<T> responseType) {
-        return doPost(url, null, body, responseType);
-    }
-
-    /**
-     * 发送post请求
-     * @param url       请求地址
-     * @param params    请求参数（url参数）
-     * @param body      请求参数（body参数）
-     * @return
-     */
-    public static String doPost(String url, Map<String, String[]> params, Object body) {
-        return doPost(url, params, body, String.class);
-    }
-
-    /**
-     * 发送post请求
-     * @param url           请求地址
-     * @param params        请求参数（url参数）
-     * @param body          请求参数（body参数）
-     * @param responseType  返回结果类型
-     * @return
-     */
-    public static <T> T doPost(String url, Map<String, String[]> params, Object body, Class<T> responseType) {
-        return doPostWithHeaders(url, params, body, null, responseType);
-    }
-
-    /**
-     * 发送post请求
-     * @param url       请求地址
-     * @param body      请求参数（body参数）
-     * @param headers   请求头
-     * @return
-     */
-    public static String doPostWithHeaders(String url, Object body, Map<String, String> headers) {
-        return doPostWithHeaders(url, body, headers, String.class);
-    }
-
-    /**
-     * 发送post请求
-     * @param url           请求地址
-     * @param body          请求参数（body参数）
-     * @param headers       请求头
-     * @param responseType  返回结果类型
-     * @return
-     */
-    public static <T> T doPostWithHeaders(String url, Object body, Map<String, String> headers, Class<T> responseType) {
-        return doPostWithHeaders(url, null, body, headers, responseType);
-    }
-
-    /**
-     * 发送post请求
-     * @param url       请求地址
-     * @param params    请求参数（url参数）
-     * @param body      请求参数（body参数）
-     * @param headers   请求头
-     * @return
-     */
-    public static String doPostWithHeaders(String url, Map<String, String[]> params, Object body, Map<String, String> headers) {
-        return doPostWithHeaders(url, params, body, headers, String.class);
-    }
-
-    /**
-     * 发送post请求
-     * @param url           请求地址
-     * @param params        请求参数（url参数）
-     * @param body          请求参数（body参数）
-     * @param headers       请求头
-     * @param responseType  返回结果类型
-     * @return
-     */
-    public static <T> T doPostWithHeaders(String url, Map<String, String[]> params, Object body, Map<String, String> headers, Class<T> responseType) {
+    public <T> T doPost(Class<T> responseType) {
+        Object body = requestEntity.getBody();
         if (Objects.isNull(body)) {
             body = new HashMap<>(4);
         }
-        HttpHeaders httpHeaders = getHttpHeaders(headers);
+        HttpHeaders httpHeaders = getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity httpEntity = new HttpEntity(body, httpHeaders);
-        ResponseEntity<T> responseEntity = restTemplate.exchange(getUrlWithParams(url, params), HttpMethod.POST, httpEntity, responseType);
-        return responseEntity.getBody();
+        return exchange(httpEntity, HttpMethod.POST, responseType);
+    }
+
+    /**
+     * 发送put请求
+     * @return
+     */
+    public String doPut() {
+        return doPut(String.class);
+    }
+
+    /**
+     * 发送put请求
+     * @param <T>
+     * @return
+     */
+    public <T> T doPut(Class<T> responseType) {
+        HttpHeaders httpHeaders = getHttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity httpEntity = new HttpEntity(getBody(), httpHeaders);
+        return exchange(httpEntity, HttpMethod.PUT, responseType);
+    }
+
+    /**
+     * 发送delete请求
+     * @return
+     */
+    public String doDelete() {
+        return doDelete(String.class);
+    }
+
+    /**
+     * 发送delete请求
+     * @param <T>
+     * @return
+     */
+    public <T> T doDelete(Class<T> responseType) {
+        HttpHeaders httpHeaders = getHttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity httpEntity = new HttpEntity(getBody(), httpHeaders);
+        return exchange(httpEntity, HttpMethod.DELETE, responseType);
     }
 
     /**
      * 文件上传
-     * @param url                   请求地址
-     * @param fileMultiValueMap     上传文件信息
      * @return
      */
-    public static String upload(String url, MultiValueMap<String, FileUpload> fileMultiValueMap) {
-        return upload(url, fileMultiValueMap, String.class);
+    public String doUpload() {
+        return doUpload(String.class);
     }
 
     /**
      * 文件上传
-     * @param url                   请求地址
-     * @param fileMultiValueMap     上传文件信息
-     * @param responseType          返回结果类型
      * @return
      */
-    public static <T> T upload(String url, MultiValueMap<String, FileUpload> fileMultiValueMap, Class<T> responseType) {
-        return upload(url, null, fileMultiValueMap, responseType);
-    }
-
-    /**
-     * 文件上传
-     * @param url                   请求地址
-     * @param formData              表单信息
-     * @param fileMultiValueMap     上传文件信息
-     * @return
-     */
-    public static String upload(String url, MultiValueMap<String, Object> formData, MultiValueMap<String, FileUpload> fileMultiValueMap) {
-        return upload(url, formData, fileMultiValueMap, String.class);
-    }
-
-    /**
-     * 文件上传
-     * @param url                   请求地址
-     * @param formData              表单信息
-     * @param fileMultiValueMap     上传文件信息
-     * @param responseType          返回结果类型
-     * @return
-     */
-    public static <T> T upload(String url, MultiValueMap<String, Object> formData, MultiValueMap<String, FileUpload> fileMultiValueMap, Class<T> responseType) {
-        return upload(url, null, null, formData, fileMultiValueMap, responseType);
-    }
-
-    /**
-     * 文件上传
-     * @param url                   请求地址
-     * @param params                请求参数（url参数）
-     * @param headers               请求头
-     * @param formData              表单信息
-     * @param fileMultiValueMap     上传文件信息
-     * @return
-     */
-    public static String upload(String url, Map<String, String[]> params, Map<String, String> headers, MultiValueMap<String, Object> formData, MultiValueMap<String, FileUpload> fileMultiValueMap) {
-        return upload(url, params, headers, formData, fileMultiValueMap, String.class);
-    }
-
-    /**
-     * 文件上传
-     * @param url                   请求地址
-     * @param params                请求参数（url参数）
-     * @param headers               请求头
-     * @param formData              表单信息
-     * @param fileMultiValueMap     上传文件信息
-     * @param responseType          返回结果类型
-     * @return
-     */
-    public static <T> T upload(String url, Map<String, String[]> params, Map<String, String> headers, MultiValueMap<String, Object> formData, MultiValueMap<String, FileUpload> fileMultiValueMap, Class<T> responseType) {
-
-        HttpHeaders httpHeaders = getHttpHeaders(headers);
+    public <T> T doUpload(Class<T> responseType) {
+        HttpHeaders httpHeaders = getHttpHeaders();
         httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
-        if (formData == null) {
-            formData = new LinkedMultiValueMap<>();
+        MultiValueMap<String, Object> formData = getFormData();
+        MultiValueMap<String, FileUpload> fileMap = requestEntity.getFileMap();
+        if (fileMap == null) {
+            fileMap = new LinkedMultiValueMap<>();
         }
-        if (fileMultiValueMap == null) {
-            fileMultiValueMap = new LinkedMultiValueMap<>();
-        }
-        for (Map.Entry<String, List<FileUpload>> entry : fileMultiValueMap.entrySet()) {
+        for (Map.Entry<String, List<FileUpload>> entry : fileMap.entrySet()) {
             String key = entry.getKey();
             for (FileUpload fileUpload : entry.getValue()) {
                 formData.add(key, new ByteArrayResource(fileUpload.getContent()) {
@@ -335,93 +152,52 @@ public class HttpClient {
             }
         }
         HttpEntity httpEntity = new HttpEntity(formData, httpHeaders);
-        ResponseEntity<T> responseEntity = restTemplate.exchange(getUrlWithParams(url, params), HttpMethod.POST, httpEntity, responseType);
-        return responseEntity.getBody();
+        return exchange(httpEntity, HttpMethod.POST, responseType);
     }
 
     /**
      * form表单提交
-     * @param url       请求地址
-     * @param formData  表单信息
      * @return
      */
-    public static String form(String url, MultiValueMap<String, Object> formData) {
-        return form(url, formData, String.class);
+    public String doForm() {
+        return doForm(String.class);
     }
 
     /**
      * form表单提交
-     * @param url           请求地址
-     * @param formData      表单信息
-     * @param responseType  返回结果类型
      * @return
      */
-    public static <T> T form(String url, MultiValueMap<String, Object> formData, Class<T> responseType) {
-        return form(url, null, null, formData, responseType);
-    }
-
-    /**
-     * form表单提交
-     * @param url       请求地址
-     * @param headers   请求头
-     * @param formData  表单信息
-     * @return
-     */
-    public static String form(String url, Map<String, String> headers, MultiValueMap<String, Object> formData) {
-        return form(url, headers, formData, String.class);
-    }
-
-    /**
-     * form表单提交
-     * @param url           请求地址
-     * @param headers       请求头
-     * @param formData      表单信息
-     * @param responseType  返回结果类型
-     * @return
-     */
-    public static <T> T form(String url, Map<String, String> headers, MultiValueMap<String, Object> formData, Class<T> responseType) {
-        return form(url, null, headers, formData, responseType);
-    }
-
-    /**
-     * form表单提交
-     * @param url       请求地址
-     * @param params    请求参数（url参数）
-     * @param headers   请求头
-     * @param formData  表单信息
-     * @return
-     */
-    public static String form(String url, Map<String, String[]> params, Map<String, String> headers, MultiValueMap<String, Object> formData) {
-        return form(url, params, headers, formData, String.class);
-    }
-
-    /**
-     * form表单提交
-     * @param url           请求地址
-     * @param params        请求参数（url参数）
-     * @param headers       请求头
-     * @param formData      表单信息
-     * @param responseType  返回结果类型
-     * @return
-     */
-    public static <T> T form(String url, Map<String, String[]> params, Map<String, String> headers, MultiValueMap<String, Object> formData, Class<T> responseType) {
-        HttpHeaders httpHeaders = getHttpHeaders(headers);
+    public <T> T doForm(Class<T> responseType) {
+        HttpHeaders httpHeaders = getHttpHeaders();
         httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
-        if (formData == null) {
-            formData = new LinkedMultiValueMap<>();
-        }
+        MultiValueMap<String, Object> formData = getFormData();
         HttpEntity httpEntity = new HttpEntity(formData, httpHeaders);
-        ResponseEntity<T> responseEntity = restTemplate.exchange(getUrlWithParams(url, params), HttpMethod.POST, httpEntity, responseType);
-        return responseEntity.getBody();
+        return exchange(httpEntity, HttpMethod.POST, responseType);
+    }
+
+
+
+    /**
+     * 发送请求
+     * @param httpEntity
+     * @param httpMethod
+     * @param responseType
+     * @return
+     */
+    private <T> T exchange(HttpEntity httpEntity, HttpMethod httpMethod, Class<T> responseType) {
+        Assert.notNull(restTemplate, "restTemplate can not be null");
+        ResponseEntity<T> responseEntity = restTemplate.exchange(getUrlWithParams(), httpMethod, httpEntity, responseType);
+        T body = responseEntity.getBody();
+        return body;
     }
 
     /**
      * 处理请求头
-     * @param headers   请求头
      * @return
      */
-    private static HttpHeaders getHttpHeaders(Map<String, String> headers) {
+    private HttpHeaders getHttpHeaders() {
         HttpHeaders httpHeaders = new HttpHeaders();
+        Map<String, String> headers = requestEntity.getHeaders();
         if (Objects.nonNull(headers)) {
             for (Map.Entry<String, String> entry : headers.entrySet()) {
                 httpHeaders.add(entry.getKey(), entry.getValue());
@@ -431,12 +207,37 @@ public class HttpClient {
     }
 
     /**
-     * 处理请求参数
-     * @param url       请求地址
-     * @param params    请求参数（url参数）
+     * 获取请求body
      * @return
      */
-    private static String getUrlWithParams(String url, Map<String, String[]> params) {
+    private Object getBody() {
+        Object body = requestEntity.getBody();
+        if (Objects.isNull(body)) {
+            body = new HashMap<>(4);
+        }
+        return body;
+    }
+
+    /**
+     * 获取表单数据
+     * @return
+     */
+    private MultiValueMap<String, Object> getFormData() {
+        MultiValueMap<String, Object> formData = requestEntity.getFormData();
+        if (formData == null) {
+            formData = new LinkedMultiValueMap<>();
+        }
+        return formData;
+    }
+
+    /**
+     * 处理请求参数
+     * @return
+     */
+    private String getUrlWithParams() {
+        String url = requestEntity.getUrl();
+        Map<String, String[]> params = requestEntity.getParams();
+        Assert.isTrue(isAvailableUrl(url), "url is not available：".concat(url));
         StringBuffer buffer = new StringBuffer();
         if (Objects.nonNull(params)) {
             for (Map.Entry<String, String[]> entry : params.entrySet()) {
@@ -452,6 +253,21 @@ public class HttpClient {
             url = url.concat("?").concat(paramsStr);
         }
         return url;
+    }
+
+    /**
+     * 判断url是否可用
+     * @param url
+     * @return
+     */
+    private static boolean isAvailableUrl(String url) {
+        if (url == null || url.trim().equals("")) {
+            return false;
+        }
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            return false;
+        }
+        return true;
     }
 
 }

@@ -2,6 +2,7 @@ package cn.iwenjuan.sample.controller;
 
 import cn.iwenjuan.rest.FileUpload;
 import cn.iwenjuan.rest.client.HttpClient;
+import cn.iwenjuan.rest.client.HttpClientBuilder;
 import com.alibaba.fastjson2.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.LinkedMultiValueMap;
@@ -42,7 +43,7 @@ public class StorageController {
         fileMultiValueMap.add("file", new FileUpload(file));
         MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
         formData.add("name", "张三");
-        String upload = HttpClient.upload("http://localhost:8080/storage/upload", formData, fileMultiValueMap, String.class);
+        String upload = HttpClientBuilder.create("http://localhost:8080/storage/upload").formData(formData).fileMap(fileMultiValueMap).build().doUpload();
         return upload;
     }
 }

@@ -1,6 +1,7 @@
 package cn.iwenjuan.sample;
 
 import cn.iwenjuan.rest.client.HttpClient;
+import cn.iwenjuan.rest.client.HttpClientBuilder;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,13 +27,23 @@ public class HttpClientTest {
         Map<String, String[]> params = new HashMap<>(16);
         params.put("name", new String[]{name, "李四"});
         params.put("date", new String[]{"2023-04-27 10:00:00"});
-        String result = HttpClient.doGet(url, params);
-        System.out.println(result);
 
-        String fileUrl = "http://10.11.10.75:9000/isrmc/files/01GK339T4P9S57PP6948MFPRAY.png";
-        byte[] bytes = HttpClient.doGet(fileUrl, byte[].class);
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-        FileOutputStream outputStream = new FileOutputStream("C://tmp/01GK339T4P9S57PP6948MFPRAY.png");
-        IOUtils.copy(inputStream, outputStream);
+        String getResult = HttpClientBuilder.create(url).params(params).build().doGet();
+        System.out.println("get请求：" + getResult);
+
+        String postResult = HttpClientBuilder.create(url).body(params).build().doPost();
+        System.out.println("post请求：" + postResult);
+
+        String putResult = HttpClientBuilder.create(url).body(params).build().doPut();
+        System.out.println("put请求：" + putResult);
+
+        String deleteResult = HttpClientBuilder.create(url).body(params).build().doDelete();
+        System.out.println("delete请求：" + deleteResult);
+
+//        String fileUrl = "http://10.11.10.75:9000/isrmc/files/01GK339T4P9S57PP6948MFPRAY.png";
+//        byte[] bytes = HttpClientBuilder.create(fileUrl).responseType(byte[].class).build().doGet();
+//        ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+//        FileOutputStream outputStream = new FileOutputStream("C://tmp/01GK339T4P9S57PP6948MFPRAY.png");
+//        IOUtils.copy(inputStream, outputStream);
     }
 }
