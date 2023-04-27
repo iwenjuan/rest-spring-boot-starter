@@ -1,6 +1,6 @@
 package cn.iwenjuan.rest.client;
 
-import cn.iwenjuan.rest.FileUpload;
+import cn.iwenjuan.rest.UploadFile;
 import cn.iwenjuan.rest.RestRequestEntity;
 import cn.iwenjuan.rest.config.RestTemplateBuilder;
 import cn.iwenjuan.rest.context.SpringApplicationContext;
@@ -41,7 +41,7 @@ public class HttpClientBuilder {
     /**
      * 文件上传信息
      */
-    private MultiValueMap<String, FileUpload> fileMap;
+    private MultiValueMap<String, UploadFile> fileMap;
 
     /**
      * 创建HttpClient构建工具
@@ -124,7 +124,7 @@ public class HttpClientBuilder {
      * @param fileMap
      * @return
      */
-    public HttpClientBuilder fileMap(MultiValueMap<String, FileUpload> fileMap) {
+    public HttpClientBuilder fileMap(MultiValueMap<String, UploadFile> fileMap) {
         this.fileMap = fileMap;
         return this;
     }

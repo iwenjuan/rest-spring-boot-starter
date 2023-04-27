@@ -39,5 +39,5 @@ public class RestRequestEntity {
     /**
      * 文件上传信息
      */
-    private MultiValueMap<String, FileUpload> fileMap;
+    private MultiValueMap<String, UploadFile> fileMap;
 }

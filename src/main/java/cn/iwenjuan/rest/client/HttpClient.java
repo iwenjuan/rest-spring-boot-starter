@@ -1,6 +1,6 @@
 package cn.iwenjuan.rest.client;
 
-import cn.iwenjuan.rest.FileUpload;
+import cn.iwenjuan.rest.UploadFile;
 import cn.iwenjuan.rest.RestRequestEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
@@ -46,8 +46,7 @@ public class HttpClient {
      * @return
      */
     public <T> T doGet(Class<T> responseType) {
-        HttpHeaders httpHeaders = getHttpHeaders();
-        HttpEntity httpEntity = new HttpEntity(null, httpHeaders);
+        HttpEntity httpEntity = new HttpEntity(null, getHttpHeaders());
         return exchange(httpEntity, HttpMethod.GET, responseType);
     }
 
@@ -64,13 +63,9 @@ public class HttpClient {
      * @return
      */
     public <T> T doPost(Class<T> responseType) {
-        Object body = requestEntity.getBody();
-        if (Objects.isNull(body)) {
-            body = new HashMap<>(4);
-        }
         HttpHeaders httpHeaders = getHttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity httpEntity = new HttpEntity(body, httpHeaders);
+        HttpEntity httpEntity = new HttpEntity(getBody(), httpHeaders);
         return exchange(httpEntity, HttpMethod.POST, responseType);
     }
 
@@ -104,7 +99,6 @@ public class HttpClient {
 
     /**
      * 发送delete请求
-     * @param <T>
      * @return
      */
     public <T> T doDelete(Class<T> responseType) {
@@ -130,23 +124,23 @@ public class HttpClient {
         HttpHeaders httpHeaders = getHttpHeaders();
         httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
         MultiValueMap<String, Object> formData = getFormData();
-        MultiValueMap<String, FileUpload> fileMap = requestEntity.getFileMap();
+        MultiValueMap<String, UploadFile> fileMap = requestEntity.getFileMap();
         if (fileMap == null) {
             fileMap = new LinkedMultiValueMap<>();
         }
-        for (Map.Entry<String, List<FileUpload>> entry : fileMap.entrySet()) {
+        for (Map.Entry<String, List<UploadFile>> entry : fileMap.entrySet()) {
             String key = entry.getKey();
-            for (FileUpload fileUpload : entry.getValue()) {
-                formData.add(key, new ByteArrayResource(fileUpload.getContent()) {
+            for (UploadFile uploadFile : entry.getValue()) {
+                formData.add(key, new ByteArrayResource(uploadFile.getContent()) {
 
                     @Override
                     public String getFilename() {
-                        return fileUpload.getFileName();
+                        return uploadFile.getFileName();
                     }
 
                     @Override
                     public long contentLength() {
-                        return fileUpload.getFileSize();
+                        return uploadFile.getFileSize();
                     }
                 });
             }

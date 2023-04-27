@@ -12,7 +12,7 @@ import java.io.InputStream;
  * @author li1244
  * @date 2023/4/27 9:33
  */
-public class FileUpload {
+public class UploadFile {
 
     /**
      * 文件名
@@ -27,19 +27,19 @@ public class FileUpload {
      */
     private byte[] content;
 
-    public FileUpload(MultipartFile multipartFile) throws IOException {
+    public UploadFile(MultipartFile multipartFile) throws IOException {
         this.fileName = multipartFile.getOriginalFilename();
         this.fileSize = multipartFile.getSize();
         this.content = IoUtils.toBytes(multipartFile.getInputStream());
     }
 
-    public FileUpload(File file) throws IOException {
+    public UploadFile(File file) throws IOException {
         this.fileName = file.getName();
         this.content = IoUtils.toBytes(new FileInputStream(file));
         this.fileSize = this.content.length;
     }
 
-    public FileUpload(String fileName, InputStream inputStream) throws IOException {
+    public UploadFile(String fileName, InputStream inputStream) throws IOException {
         this.fileName = fileName;
         this.content = IoUtils.toBytes(inputStream);
         this.fileSize = this.content.length;
