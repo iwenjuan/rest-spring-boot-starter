@@ -2,7 +2,7 @@ package cn.iwenjuan.rest.config;
 
 import cn.iwenjuan.rest.context.SpringApplicationContext;
 import cn.iwenjuan.rest.enums.ClientType;
-import cn.iwenjuan.rest.properties.UrlConnectionProperties;
+import cn.iwenjuan.rest.properties.RestProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +25,7 @@ public class RestConfiguration {
     public RestTemplate restTemplate() {
         return RestTemplateBuilder.create()
                 .clientType(ClientType.URLConnection)
-                .urlConnection(new UrlConnectionProperties())
+                .urlConnection(new RestProperties.UrlConnectionProperties())
                 .build();
     }
 }

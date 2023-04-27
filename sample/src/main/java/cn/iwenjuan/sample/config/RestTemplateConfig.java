@@ -1,9 +1,7 @@
 package cn.iwenjuan.sample.config;
 
 import cn.iwenjuan.rest.config.RestTemplateBuilder;
-import cn.iwenjuan.rest.enums.ClientType;
 import cn.iwenjuan.rest.properties.RestProperties;
-import cn.iwenjuan.rest.properties.UrlConnectionProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -2,5 +2,41 @@ server:
   port: 8080
 
 spring:
+  # http请求配置
   rest:
-    client-type: okhttp
+    # 客户端类型
+    client-type: urlconnection
+    # URLConnection配置
+    url-connection:
+      # 客户端和服务器建立连接超时时间
+      connect-timeout: 2000
+      # 客户端从服务器读取数据包超时时间
+      read-timeout: 30000
+      # 是否长链接
+      keep-alive: false
+    # HttpClient配置
+    http-client:
+      # 连接池的最大连接数
+      max-total-connect: 200
+      # 相同域名允许创建的最大连接数
+      max-connect-per-route: 5
+      # 客户端和服务器建立连接超时时间
+      connect-timeout: 2000
+      # 读数据的超时时间
+      socket-timeout: 30000
+      # 连接池创建连接时的超时时间
+      connection-request-timout: 200
+    # OKHttp配置
+    ok-http:
+      # 失败后是否重试
+      retry-on-connection-failure: false
+      # 链接超时时间
+      connect-timeout: 2000
+      # 读超时时间
+      read-timeout: 10000
+      # 写超时时间
+      write-timeout: 10000
+      # 最大空闲的连接数
+      max-idle-connections: 5
+      # 最大的空闲时间
+      keep-alive-duration-ns: 3000

@@ -1,9 +1,7 @@
 package cn.iwenjuan.rest.config;
 
 import cn.iwenjuan.rest.enums.ClientType;
-import cn.iwenjuan.rest.properties.HttpClientProperties;
-import cn.iwenjuan.rest.properties.OkHttpProperties;
-import cn.iwenjuan.rest.properties.UrlConnectionProperties;
+import cn.iwenjuan.rest.properties.RestProperties;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
@@ -46,15 +44,15 @@ public class RestTemplateBuilder {
     /**
      * URLConnection配置
      */
-    private UrlConnectionProperties urlConnection;
+    private RestProperties.UrlConnectionProperties urlConnection;
     /**
      * HttpClient配置
      */
-    private HttpClientProperties httpClient;
+    private RestProperties.HttpClientProperties httpClient;
     /**
      * OKHttp配置
      */
-    private OkHttpProperties okHttp;
+    private RestProperties.OkHttpProperties okHttp;
 
     /**
      * 创建RestTemplate构建工具
@@ -79,7 +77,7 @@ public class RestTemplateBuilder {
      * @param urlConnection
      * @return
      */
-    public RestTemplateBuilder urlConnection(UrlConnectionProperties urlConnection) {
+    public RestTemplateBuilder urlConnection(RestProperties.UrlConnectionProperties urlConnection) {
         this.urlConnection = urlConnection;
         return this;
     }
@@ -89,7 +87,7 @@ public class RestTemplateBuilder {
      * @param httpClient
      * @return
      */
-    public RestTemplateBuilder httpClient(HttpClientProperties httpClient) {
+    public RestTemplateBuilder httpClient(RestProperties.HttpClientProperties httpClient) {
         this.httpClient = httpClient;
         return this;
     }
@@ -99,7 +97,7 @@ public class RestTemplateBuilder {
      * @param okHttp
      * @return
      */
-    public RestTemplateBuilder okHttp(OkHttpProperties okHttp) {
+    public RestTemplateBuilder okHttp(RestProperties.OkHttpProperties okHttp) {
         this.okHttp = okHttp;
         return this;
     }
@@ -135,7 +133,7 @@ public class RestTemplateBuilder {
     private SimpleClientHttpRequestFactory simpleClientHttpRequestFactory() {
 
         if (urlConnection == null) {
-            urlConnection = new UrlConnectionProperties();
+            urlConnection = new RestProperties.UrlConnectionProperties();
         }
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
             @Override
@@ -169,7 +167,7 @@ public class RestTemplateBuilder {
     private HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory() {
 
         if (httpClient == null) {
-            httpClient = new HttpClientProperties();
+            httpClient = new RestProperties.HttpClientProperties();
         }
         SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(getSSLContext(), new NoopHostnameVerifier());
 
@@ -209,7 +207,7 @@ public class RestTemplateBuilder {
     private OkHttp3ClientHttpRequestFactory okHttp3ClientHttpRequestFactory() {
 
         if (okHttp == null) {
-            okHttp = new OkHttpProperties();
+            okHttp = new RestProperties.OkHttpProperties();
         }
         // 连接池
         ConnectionPool connectionPool = new ConnectionPool(okHttp.getMaxIdleConnections(), okHttp.getKeepAliveDurationNs(), TimeUnit.SECONDS);

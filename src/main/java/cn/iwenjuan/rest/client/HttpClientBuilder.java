@@ -5,7 +5,7 @@ import cn.iwenjuan.rest.RestRequestEntity;
 import cn.iwenjuan.rest.config.RestTemplateBuilder;
 import cn.iwenjuan.rest.context.SpringApplicationContext;
 import cn.iwenjuan.rest.enums.ClientType;
-import cn.iwenjuan.rest.properties.UrlConnectionProperties;
+import cn.iwenjuan.rest.properties.RestProperties;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
@@ -53,7 +53,7 @@ public class HttpClientBuilder {
         if (restTemplate == null) {
             restTemplate = RestTemplateBuilder.create()
                     .clientType(ClientType.URLConnection)
-                    .urlConnection(new UrlConnectionProperties())
+                    .urlConnection(new RestProperties.UrlConnectionProperties())
                     .build();
         }
         return new HttpClientBuilder().restTemplate(restTemplate).url(url);
