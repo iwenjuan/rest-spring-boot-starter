@@ -49,14 +49,7 @@ public class HttpClientBuilder {
      * @return
      */
     public static HttpClientBuilder create(String url) {
-        RestTemplate restTemplate = SpringApplicationContext.getBean("restTemplate");
-        if (restTemplate == null) {
-            restTemplate = RestTemplateBuilder.create()
-                    .clientType(ClientType.URLConnection)
-                    .urlConnection(new RestProperties.UrlConnectionProperties())
-                    .build();
-        }
-        return new HttpClientBuilder().restTemplate(restTemplate).url(url);
+        return new HttpClientBuilder().url(url);
     }
 
     /**
@@ -65,6 +58,15 @@ public class HttpClientBuilder {
      * @return
      */
     public HttpClientBuilder restTemplate(RestTemplate restTemplate) {
+        if (restTemplate == null) {
+            restTemplate = SpringApplicationContext.getBean("restTemplate");
+        }
+        if (restTemplate == null) {
+            restTemplate = RestTemplateBuilder.create()
+                    .clientType(ClientType.URLConnection)
+                    .urlConnection(new RestProperties.UrlConnectionProperties())
+                    .build();
+        }
         this.restTemplate = restTemplate;
         return this;
     }
@@ -134,6 +136,9 @@ public class HttpClientBuilder {
      * @return
      */
     public HttpClient build() {
+        if (this.restTemplate == null) {
+            this.restTemplate(null);
+        }
         RestRequestEntity requestEntity = new RestRequestEntity()
                 .setUrl(this.url)
                 .setParams(this.params)
