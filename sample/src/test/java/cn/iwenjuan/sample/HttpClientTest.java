@@ -4,7 +4,9 @@ import cn.iwenjuan.rest.UploadFile;
 import cn.iwenjuan.rest.client.HttpClientBuilder;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -19,8 +21,21 @@ import java.util.Map;
  * @author li1244
  * @date 2023/4/26 15:51
  */
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class HttpClientTest {
+
+    @Autowired
+    TestRestTemplate testRestTemplate;
+
+    @Test
+    public void run1() {
+        String name = "张三";
+        Map<String, String[]> params = new HashMap<>(16);
+        params.put("name", new String[]{name, "李四"});
+        params.put("date", new String[]{"2023-04-27 10:00:00"});
+        String result = testRestTemplate.getForObject("/test?name={name}&date={date}", String.class, params);
+        System.out.println("接口返回结果：" + result);
+    }
 
     @Test
     public void run() {
