@@ -141,6 +141,6 @@ public class HttpClientBuilder {
                 .setBody(this.body)
                 .setFormData(this.formData)
                 .setFileMap(this.fileMap);
-        return new HttpClient(restTemplate, requestEntity);
+        return new HttpClient(this.restTemplate, requestEntity);
     }
 }
